@@ -25,9 +25,14 @@ function initializeDateToMidnight(d) {
   return param;
 }
 
+function isValidReward(redeemedAt, expiresAt, currentDateTime) {
+  return redeemedAt === null && expiresAt >= currentDateTime;
+}
+
 module.exports = {
   getDayOfWeek,
   getStartOfWeek,
   getEndOfWeek,
   initializeDateToMidnight,
+  isValidReward,
 };

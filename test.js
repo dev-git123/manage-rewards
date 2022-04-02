@@ -1,7 +1,7 @@
 const { DAY } = require("./utils/constant");
-const dateUtil = require("./utils/utils");
+const utilsService = require("./utils/utils");
 
-/**  Domain Background:
+/** Business Background:
  ** Weekly Rewards will be considered from Sunday through to Saturday whenever the user requested for any day of the week .
  **/
 
@@ -9,13 +9,13 @@ const dateUtil = require("./utils/utils");
      - return 0 to 6
      - input can be any day of the week (Monday to Sunday) in ISO date string format*/
 test("Convert to the day of the week", () => {
-  const sunday = dateUtil.getDayOfWeek("2022-03-27T14:48:00.000Z");
-  const monday = dateUtil.getDayOfWeek("2022-03-28T14:48:00.000Z");
-  const tuesday = dateUtil.getDayOfWeek("2022-03-29T14:48:00.000Z");
-  const wednesday = dateUtil.getDayOfWeek("2022-03-30T14:48:00.000Z");
-  const thursday = dateUtil.getDayOfWeek("2022-03-31T14:48:00.000Z");
-  const friday = dateUtil.getDayOfWeek("2022-04-01T14:48:00.000Z");
-  const saturaday = dateUtil.getDayOfWeek("2022-04-02T14:48:00.000Z");
+  const sunday = utilsService.getDayOfWeek("2022-03-27T14:48:00.000Z");
+  const monday = utilsService.getDayOfWeek("2022-03-28T14:48:00.000Z");
+  const tuesday = utilsService.getDayOfWeek("2022-03-29T14:48:00.000Z");
+  const wednesday = utilsService.getDayOfWeek("2022-03-30T14:48:00.000Z");
+  const thursday = utilsService.getDayOfWeek("2022-03-31T14:48:00.000Z");
+  const friday = utilsService.getDayOfWeek("2022-04-01T14:48:00.000Z");
+  const saturaday = utilsService.getDayOfWeek("2022-04-02T14:48:00.000Z");
   expect(sunday).toBe(DAY.Sunday);
   expect(monday).toBe(DAY.Monday);
   expect(tuesday).toBe(DAY.Tuesday);
@@ -40,13 +40,13 @@ test("GET START OF THE WEEK", () => {
   let expected = new Date(sunday);
   expected.setUTCHours(0, 0, 0, 0); //initialize Date To Midnight
 
-  expect(dateUtil.getStartOfWeek(sunday)).toStrictEqual(expected);
-  expect(dateUtil.getStartOfWeek(monday)).toStrictEqual(expected);
-  expect(dateUtil.getStartOfWeek(tuesday)).toStrictEqual(expected);
-  expect(dateUtil.getStartOfWeek(wednesday)).toStrictEqual(expected);
-  expect(dateUtil.getStartOfWeek(thursday)).toStrictEqual(expected);
-  expect(dateUtil.getStartOfWeek(friday)).toStrictEqual(expected);
-  expect(dateUtil.getStartOfWeek(saturaday)).toStrictEqual(expected);
+  expect(utilsService.getStartOfWeek(sunday)).toStrictEqual(expected);
+  expect(utilsService.getStartOfWeek(monday)).toStrictEqual(expected);
+  expect(utilsService.getStartOfWeek(tuesday)).toStrictEqual(expected);
+  expect(utilsService.getStartOfWeek(wednesday)).toStrictEqual(expected);
+  expect(utilsService.getStartOfWeek(thursday)).toStrictEqual(expected);
+  expect(utilsService.getStartOfWeek(friday)).toStrictEqual(expected);
+  expect(utilsService.getStartOfWeek(saturaday)).toStrictEqual(expected);
 });
 
 /* TestCase: 
@@ -64,13 +64,13 @@ test("GET END OF THE WEEK", () => {
   let expected = new Date(saturaday);
   expected.setUTCHours(0, 0, 0, 0); //initialize Date To Midnight
 
-  expect(dateUtil.getEndOfWeek(sunday)).toStrictEqual(expected);
-  expect(dateUtil.getEndOfWeek(monday)).toStrictEqual(expected);
-  expect(dateUtil.getEndOfWeek(tuesday)).toStrictEqual(expected);
-  expect(dateUtil.getEndOfWeek(wednesday)).toStrictEqual(expected);
-  expect(dateUtil.getEndOfWeek(thursday)).toStrictEqual(expected);
-  expect(dateUtil.getEndOfWeek(friday)).toStrictEqual(expected);
-  expect(dateUtil.getEndOfWeek(saturaday)).toStrictEqual(expected);
+  expect(utilsService.getEndOfWeek(sunday)).toStrictEqual(expected);
+  expect(utilsService.getEndOfWeek(monday)).toStrictEqual(expected);
+  expect(utilsService.getEndOfWeek(tuesday)).toStrictEqual(expected);
+  expect(utilsService.getEndOfWeek(wednesday)).toStrictEqual(expected);
+  expect(utilsService.getEndOfWeek(thursday)).toStrictEqual(expected);
+  expect(utilsService.getEndOfWeek(friday)).toStrictEqual(expected);
+  expect(utilsService.getEndOfWeek(saturaday)).toStrictEqual(expected);
 });
 
 /* TestCase: 
@@ -79,7 +79,56 @@ test("GET END OF THE WEEK", () => {
 test("Initialize Date To Midnight", () => {
   const dateIsoFormat = "2022-03-27T14:48:08.000Z";
   let expected = new Date("2022-03-27T00:00:00.000Z");
-  let actual = new Date(dateUtil.initializeDateToMidnight(dateIsoFormat));
+  let actual = new Date(utilsService.initializeDateToMidnight(dateIsoFormat));
 
   expect(actual).toStrictEqual(expected);
+});
+
+/* TestCase:  Check if redeemedAt is null and the expiresAt has not yet passed
+     - if yes, return true
+     - if not, return false */
+describe("Valid Reward Points", () => {
+  it("Redeemed at the expiry Date", () => {
+    //when
+    var redeemedAt = null;
+    var expiredAt = new Date("2022-04-25T00:00:00.000Z");
+    var currentTime = new Date("2022-04-25T00:00:00.000Z");
+
+    //then
+    let actual = utilsService.isValidReward(redeemedAt, expiredAt, currentTime);
+    expect(actual).toBe(true);
+  });
+
+  it("Redeemed before the expiry Date", () => {
+    //when
+    var redeemedAt = null;
+    var expiredAt = new Date("2022-04-25T00:00:00.000Z");
+    var currentTime = new Date("2022-04-23T00:00:00.000Z");
+
+    //then
+    let actual = utilsService.isValidReward(redeemedAt, expiredAt, currentTime);
+    expect(actual).toBe(true);
+  });
+
+  it("Redeemed after the expiry Date", () => {
+    //when
+    var redeemedAt = null;
+    var expiredAt = new Date("2022-04-22T00:00:00.000Z");
+    var currentTime = new Date("2022-04-23T00:00:00.000Z");
+
+    //then
+    let actual = utilsService.isValidReward(redeemedAt, expiredAt, currentTime);
+    expect(actual).toBe(false);
+  });
+
+  it("Redeemed the rewards that has already redeemed", () => {
+    //when
+    var redeemedAt = "2022-04-22T00:00:00.000Z";
+    var expiredAt = new Date("2022-05-18T00:00:00.000Z");
+    var currentTime = new Date("2022-04-23T00:00:00.000Z");
+
+    //then
+    let actual = utilsService.isValidReward(redeemedAt, expiredAt, currentTime);
+    expect(actual).toBe(false);
+  });
 });
