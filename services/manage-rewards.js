@@ -37,13 +37,14 @@ let saveRewards = (param) => {
   let sevenDaysRewards = createWeeklyRewards(USER_ID, startOfWeek, endOfWeek);
 
   let WEEKLY_REWARDS = new Map(); //START_OF_WEEK as KEY
-  WEEKLY_REWARDS.set(startOfWeek.toISOString(), sevenDaysRewards);
 
-  //Append new weekly rewards to existing ones of same user
   let existingUserRewardsList = rewardDataSources.get(USER_ID);
   if (existingUserRewardsList) {
-    existingUserRewardsList.set(WEEKLY_REWARDS);
+    //Append new weekly rewards to existing ones of same user
+    existingUserRewardsList.set(startOfWeek.toISOString(), sevenDaysRewards);
     WEEKLY_REWARDS = existingUserRewardsList;
+  } else {
+    WEEKLY_REWARDS.set(startOfWeek.toISOString(), sevenDaysRewards);
   }
 
   //SAVE the Weekly Rewards
@@ -130,7 +131,7 @@ let redeemRewards = (userId, fromDate) => {
             currentDateTime
           )
         ) {
-          reward.redeemedAt = currentDateTime;
+          reward.redeemedAt = currentDateTime.toISOString();
           result = { ...reward };
         } else {
           //the reward is no longer valid. it has already expired
@@ -146,7 +147,9 @@ let redeemRewards = (userId, fromDate) => {
     }
 
     //Update the redeemed rewards for specific userId
-    rewardDataSources.get(userId).set(startOfWeek, updatedWeeklyRewards);
+    rewardDataSources
+      .get(userId)
+      .set(startOfWeek.toISOString(), updatedWeeklyRewards);
   }
 
   return result;
